@@ -54,42 +54,113 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .auth-hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
 .auth-hint a{color:var(--accent);text-decoration:none;}
 
-/* ── NAV ── */
-nav{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:0 24px;display:flex;align-items:center;justify-content:space-between;
-  height:56px;position:sticky;top:0;z-index:100;
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:60px;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0;z-index:100;gap:4px;
 }
-.nav-brand{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.nav-brand span{color:var(--accent);}
-.nav-tabs{display:flex;gap:4px;}
+.sidebar-logo{
+  font-size:22px;margin-bottom:12px;padding-bottom:12px;
+  border-bottom:1px solid var(--border);width:100%;text-align:center;
+}
 .nav-tab{
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;transition:all .15s;
+  position:relative;background:none;border:none;color:var(--muted);cursor:pointer;
+  width:44px;height:44px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;transition:all .15s;
 }
 .nav-tab:hover{color:var(--text);background:var(--border);}
 .nav-tab.active{color:var(--accent);background:rgba(88,166,255,.1);}
-.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* TOOLTIP */
+.nav-tab::after{
+  content:attr(data-tip);
+  position:absolute;left:54px;top:50%;transform:translateY(-50%);
+  background:#1c2128;border:1px solid var(--border);color:var(--text);
+  font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.nav-tab:hover::after{opacity:1;}
+
+/* SIDEBAR BOTTOM */
+.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--border);width:100%;}
 
 /* SYNC */
-.sync-status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);cursor:pointer;}
 .sync-dot.ok{background:var(--green);}
 .sync-dot.saving{background:var(--yellow);animation:pulse 1s infinite;}
 .sync-dot.error{background:var(--red);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.sync-btn{
+  position:relative;background:none;border:none;color:var(--muted);cursor:pointer;
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:all .15s;
+}
+.sync-btn:hover{color:var(--text);background:var(--border);}
+.sync-btn::after{
+  content:attr(data-tip);
+  position:absolute;left:44px;top:50%;transform:translateY(-50%);
+  background:#1c2128;border:1px solid var(--border);color:var(--text);
+  font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .15s;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.sync-btn:hover::after{opacity:1;}
 
 /* USER AVATAR */
 .user-pill{
-  display:flex;align-items:center;gap:7px;cursor:pointer;
-  background:var(--surface2);border:1px solid var(--border);border-radius:20px;
-  padding:4px 10px 4px 4px;font-size:12px;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  position:relative;
 }
-.user-pill img{width:24px;height:24px;border-radius:50%;}
+.user-pill img{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);transition:border-color .15s;}
+.user-pill:hover img{border-color:var(--accent);}
+.user-pill::after{
+  content:'Sair';
+  position:absolute;left:44px;top:50%;transform:translateY(-50%);
+  background:#1c2128;border:1px solid var(--border);color:var(--text);
+  font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .15s;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.user-pill:hover::after{opacity:1;}
+.user-pill-default{
+  width:32px;height:32px;border-radius:50%;background:var(--surface2);
+  border:2px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;transition:border-color .15s;
+}
+.user-pill-default:hover{border-color:var(--accent);}
+
+/* ADD BTN */
+.add-btn{
+  width:36px;height:36px;border-radius:8px;background:var(--accent);border:none;
+  color:#0d1117;font-size:20px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:opacity .15s;position:relative;
+}
+.add-btn:hover{opacity:.85;}
+.add-btn::after{
+  content:'Nova Posição';
+  position:absolute;left:44px;top:50%;transform:translateY(-50%);
+  background:#1c2128;border:1px solid var(--border);color:var(--text);
+  font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .15s;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.add-btn:hover::after{opacity:1;}
 
 /* ── LAYOUT ── */
+body{display:flex;}
+.app-wrap{flex:1;margin-left:60px;min-height:100vh;}
 main{max-width:1300px;margin:0 auto;padding:28px 20px;}
 .page{display:none;}.page.active{display:block;}
+
+@media(max-width:640px){
+  .sidebar{width:50px;}
+  .app-wrap{margin-left:50px;}
+  .nav-tab{width:38px;height:38px;}
+}
 
 /* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;margin-bottom:28px;}
@@ -179,11 +250,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 @media(max-width:640px){
   .form-grid{grid-template-columns:1fr;}
   .kpi-value{font-size:20px;}
-  nav{padding:0 12px;}
-  .nav-tab{padding:6px 9px;font-size:12px;}
   .search-input{width:120px;}
-  .nav-brand span{display:none;}
-  .sync-label-txt{display:none;}
+  .sidebar{width:50px;}
+  .app-wrap{margin-left:50px;}
+  .nav-tab{width:38px;height:38px;}
 }
 </style>
 </head>
@@ -217,29 +287,39 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<!-- ── APP ── -->
-<nav>
-  <div class="nav-brand">📈 <span>Portfolio</span> Tracker</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard',this)">Dashboard</button>
-    <button class="nav-tab" onclick="showPage('posicoes',this)">Posições</button>
-    <button class="nav-tab" onclick="showPage('dividendos',this)">Dividendos</button>
-    <button class="nav-tab" onclick="showPage('historico',this)">Histórico</button>
-  </div>
-  <div class="nav-right">
-    <div class="sync-status">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-label" class="sync-label-txt">—</span>
-    </div>
-    <button class="btn btn-ghost btn-sm" onclick="syncNow()">↻</button>
-    <button class="btn btn-primary" onclick="openModal()">＋ Posição</button>
-    <div class="user-pill" id="user-pill" onclick="signOut()" title="Clica para sair" style="display:none">
-      <img id="user-avatar" src="" alt="">
-      <span id="user-name"></span>
-    </div>
-  </div>
-</nav>
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sidebar-logo">📈</div>
 
+  <button class="nav-tab active" data-tip="Dashboard" onclick="showPage('dashboard',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  </button>
+
+  <button class="nav-tab" data-tip="Posições" onclick="showPage('posicoes',this)">
+    <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+  </button>
+
+  <button class="nav-tab" data-tip="Dividendos" onclick="showPage('dividendos',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M8 14h.01M12 17h.01M16 14h.01"/></svg>
+  </button>
+
+  <button class="nav-tab" data-tip="Histórico" onclick="showPage('historico',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><polyline points="3 3 3 9 9 9"/></svg>
+  </button>
+
+  <div class="sidebar-bottom">
+    <button class="add-btn" onclick="openModal()" title="">＋</button>
+    <button class="sync-btn" id="sync-btn" onclick="syncNow()" data-tip="Sincronizar">
+      <div class="sync-dot" id="sync-dot"></div>
+    </button>
+    <div class="user-pill" id="user-pill" onclick="signOut()" style="display:none">
+      <img id="user-avatar" src="" alt="">
+    </div>
+    <div class="user-pill-default" id="user-pill-default" onclick="signOut()" title="Sair" style="display:none">👤</div>
+  </div>
+</div>
+
+<div class="app-wrap">
 <main>
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
@@ -306,6 +386,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
     </div>
   </div>
 </main>
+</div><!-- end app-wrap -->
 
 <!-- MODAL POSIÇÃO -->
 <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
@@ -453,9 +534,14 @@ async function onTokenReceived(resp) {
 }
 
 function showUserPill(name, avatar) {
-  document.getElementById('user-name').textContent = name;
-  if (avatar) document.getElementById('user-avatar').src = avatar;
-  document.getElementById('user-pill').style.display = 'flex';
+  if (avatar) {
+    document.getElementById('user-avatar').src = avatar;
+    document.getElementById('user-pill').style.display = 'flex';
+    document.getElementById('user-pill-default').style.display = 'none';
+  } else {
+    document.getElementById('user-pill').style.display = 'none';
+    document.getElementById('user-pill-default').style.display = 'flex';
+  }
 }
 
 function hideAuthScreen() {
@@ -473,7 +559,7 @@ function signOut() {
 // ── DRIVE SYNC ────────────────────────────────────────────────────────────────
 function setSyncStatus(state, label) {
   document.getElementById('sync-dot').className = 'sync-dot ' + state;
-  document.getElementById('sync-label').textContent = label;
+  document.getElementById('sync-btn').setAttribute('data-tip', label);
 }
 
 async function ensureToken() {

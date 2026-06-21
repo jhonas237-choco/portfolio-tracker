@@ -309,7 +309,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 
   <div class="sidebar-bottom">
     <button class="add-btn" onclick="openModal()" title="">＋</button>
-    <button class="sync-btn" id="sync-btn" onclick="syncNow()" data-tip="Sincronizar">
+    <button class="sync-btn" id="sync-btn" onclick="updateAllPrices()" data-tip="Actualizar preços" style="font-size:13px">💹</button>
+    <button class="sync-btn" id="sync-btn2" onclick="syncNow()" data-tip="Guardar no Drive">
       <div class="sync-dot" id="sync-dot"></div>
     </button>
     <div class="user-pill" id="user-pill" onclick="signOut()" style="display:none">
@@ -397,7 +398,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
   </div>
   <div class="modal-body">
     <div class="form-grid">
-      <div class="form-group"><label>Ticker *</label><input id="f-ticker" type="text" placeholder="AAPL" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="form-group"><label>Ticker *</label><input id="f-ticker" type="text" placeholder="AAPL" oninput="onTickerInput()"></div>
       <div class="form-group"><label>Tipo *</label><select id="f-tipo" onchange="toggleOpt()"><option>Stock</option><option>ETF</option><option>Option</option></select></div>
       <div class="form-group option-fields" id="of1"><label>Estratégia</label>
         <select id="f-estrategia"><option value="">—</option><option>Naked Call</option><option>Naked Put</option><option>Covered Call</option><option>Cash Secured Put</option><option>Straddle</option><option>Strangle</option><option>Iron Condor</option><option>Spread</option></select>
@@ -407,7 +408,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
       <div class="form-group option-fields" id="of4"><label>Expiração</label><input id="f-expiracao" type="date"></div>
       <div class="form-group"><label>Quantidade *</label><input id="f-qtd" type="number" step="0.01" placeholder="10"></div>
       <div class="form-group"><label>Preço entrada *</label><input id="f-entrada" type="number" step="0.01" placeholder="0.00"></div>
-      <div class="form-group"><label>Preço atual</label><input id="f-atual" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>Preço atual <span style="color:var(--green);font-size:10px">● auto</span></label><input id="f-atual" type="number" step="0.01" placeholder="A obter…" readonly style="color:var(--green)"></div>
       <div class="form-group"><label>Data abertura</label><input id="f-data" type="date"></div>
       <div class="form-group"><label>Sector</label><input id="f-sector" type="text" placeholder="Tech, Finance…"></div>
       <div class="form-group"><label>Estado</label><select id="f-status" onchange="toggleClose()"><option value="Aberta">Aberta</option><option value="Fechada">Fechada</option></select></div>
@@ -639,6 +640,8 @@ async function loadFromDrive() {
     dividends = data.dividends || [];
     setSyncStatus('ok', 'Sincronizado');
     renderAll();
+    // Update prices in background
+    updateAllPrices();
   } catch(e) {
     setSyncStatus('error', 'Erro');
     toast('Erro ao carregar: ' + e.message);
@@ -922,6 +925,71 @@ function delDiv(id){
   if(!confirm('Eliminar dividendo?'))return;
   dividends=dividends.filter(d=>d.id!==id);
   scheduleSave();renderDividends();renderDashboard();toast('Dividendo eliminado');
+}
+
+// ── PREÇOS EM TEMPO REAL ──────────────────────────────────────────────────────
+async function fetchPrice(ticker) {
+  try {
+    const res = await fetch(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    return price || null;
+  } catch(_) { return null; }
+}
+
+async function fetchPrices(tickers) {
+  const unique = [...new Set(tickers)];
+  const results = {};
+  await Promise.all(unique.map(async t => {
+    const p = await fetchPrice(t);
+    if (p) results[t] = p;
+  }));
+  return results;
+}
+
+async function updateAllPrices() {
+  const open = positions.filter(p => p.status === 'Aberta');
+  if (!open.length) return;
+  const tickers = open.map(p => p.ticker);
+  toast('A actualizar preços…');
+  const prices = await fetchPrices(tickers);
+  let updated = false;
+  positions = positions.map(p => {
+    if (p.status === 'Aberta' && prices[p.ticker]) {
+      updated = true;
+      return { ...p, preco_atual: prices[p.ticker] };
+    }
+    return p;
+  });
+  if (updated) { scheduleSave(); renderAll(); toast('Preços actualizados ✓'); }
+  else toast('Não foi possível obter preços');
+}
+
+// Auto-fill price when ticker is typed in modal
+let tickerTimer = null;
+async function onTickerInput() {
+  const ticker = document.getElementById('f-ticker').value.trim().toUpperCase();
+  document.getElementById('f-ticker').value = ticker;
+  if (ticker.length < 1) return;
+  clearTimeout(tickerTimer);
+  tickerTimer = setTimeout(async () => {
+    const priceEl = document.getElementById('f-atual');
+    priceEl.placeholder = 'A obter preço…';
+    const price = await fetchPrice(ticker);
+    if (price) {
+      priceEl.value = price;
+      priceEl.placeholder = '0.00';
+      // also pre-fill entry price if empty
+      const entradaEl = document.getElementById('f-entrada');
+      if (!entradaEl.value) entradaEl.value = price;
+    } else {
+      priceEl.placeholder = 'Preço não encontrado';
+    }
+  }, 600);
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
